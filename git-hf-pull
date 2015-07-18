@@ -42,19 +42,55 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
+require_git_repo
+require_hubflow_initialized
+hubflow_load_settings
+
 usage() {
-	echo "usage: git hf version"
+    echo "usage: git hf pull [-r]"
+}
+
+parse_args() {
+    # parse options
+    FLAGS "$@" || exit $?
+    eval set -- "${FLAGS_ARGV}"
 }
 
 cmd_default() {
-	if hubflow_has_new_version_available > /dev/null ; then
-		echo "$HUBFLOW_VERSION - upgrade available"
-	else
-		echo "$HUBFLOW_VERSION - latest version"
-	fi
+    cmd_pull "$@"
 }
 
 cmd_help() {
-	usage
-	exit 0
+    usage
+    exit 0
+}
+
+cmd_pull() {
+    # we support rebasing
+    DEFINE_boolean rebase false "pull with rebase" r
+    parse_args "$@"
+
+    # make sure we're okay to start
+    require_clean_working_tree
+
+    # we need to fetch the latest changes from upstream, before we can merge
+    hubflow_fetch_latest_changes_from_origin
+
+    # merge the changes from upstream
+    if flag rebase ; then
+        git pull --rebase "$ORIGIN"
+        if [[ $? -ne 0 ]]; then
+            warn "Pull was aborted."
+            warn
+            warn "There might be conflicts during the rebase, or '$ORIGIN' may be inaccessible."
+            exit 1
+        fi
+    else
+        hubflow_remote_merge_helper "$ORIGIN" "$CURRENT_BRANCH"
+    fi
+
+    # all done
+    echo
+    echo "Summary of actions:"
+    echo "- Any changes from $ORIGIN/$CURRENT_BRANCH have been pulled into branch '$CURRENT_BRANCH'"
 }
