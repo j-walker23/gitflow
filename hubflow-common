@@ -173,7 +173,7 @@ git_is_branch_merged_into() {
 
 git_config_get_branch() {
     local escaped_branch=$(echo $1 | sed -e 's/\./\\./g')
-    git config --get "branch.$escaped_branch.$2"
+    echo $(git config --get "branch.$escaped_branch.$2")
 }
 
 git_config_set_branch() {
