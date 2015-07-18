@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.6.0-dev
+HUBFLOW_VERSION=1.6.0
 HUBFLOW_REPO=https://github.com/datasift/gitflow
 GITHUB_HOST="github.com"
 
@@ -179,6 +179,11 @@ git_config_get_branch() {
 git_config_set_branch() {
     local escaped_branch=$(echo $1 | sed -e 's/\./\\./g')
     git config "branch.$escaped_branch.$2" "$3"
+}
+
+git_config_unset_branch() {
+    local escaped_branch=$(echo $1 | sed -e 's/\./\\./g')
+	git config --unset "branch.$escaped_branch.$2"
 }
 
 git_list_branches_of_type() {
@@ -449,6 +454,20 @@ hubflow_merge_latest_changes_from_origin() {
             git push "$ORIGIN" "$DEVELOP_BRANCH" || die "Push to '$ORIGIN' failed"
         fi
     fi
+
+	# merge any support branches that exist
+	local support_branches=$(git_list_branches_of_type support)
+	for support_branch in $support_branches ; do
+		support_branch=$SUPPORT_PREFIX$support_branch
+		# skip support branches we don't use locally
+		if git_local_branch_exists $support_branch ; then
+			hubflow_remote_merge_helper "$ORIGIN" "$support_branch" no_checkout_afterwards
+			git_compare_branches "$support_branch" "$ORIGIN/$support_branch"
+			if [[ $? -ne 0 ]] ; then
+				git push "$ORIGIN" "$support_branch" || die "Push to '$ORIGIN' failed"
+			fi
+		fi
+	done
 
     # switch back to the original branch
     hubflow_branch_pop
