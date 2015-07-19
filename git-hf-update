@@ -56,6 +56,18 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 }
 
+use_current_feature_branch_name() {
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$FEATURE_PREFIX"; then
+		FEATURE_BRANCH=$current_branch
+		NAME=${FEATURE_BRANCH#$FEATURE_PREFIX}
+	else
+		warn "The current HEAD is not a feature branch."
+		warn "Please specify a <name> argument."
+		exit 1
+	fi
+}
+
 cmd_default() {
 	cmd_update "$@"
 }
@@ -80,6 +92,12 @@ cmd_update() {
 	if [[ $(git_current_branch) != $CURRENT_BRANCH ]] ; then
 		git checkout "$CURRENT_BRANCH" || die "Unable to checkout branch '$CURRENT_BRANCH'"
 	fi
+
+	use_current_feature_branch_name
+
+	if [[ -n $NAME ]]; then
+	    git merge $ORIGIN/$DEVELOP_BRANCH
+    fi
 
 	# drop any branches that have disappeared from origin
 	if flag prune ; then
