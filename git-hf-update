@@ -61,10 +61,6 @@ use_current_feature_branch_name() {
 	if startswith "$current_branch" "$FEATURE_PREFIX"; then
 		FEATURE_BRANCH=$current_branch
 		NAME=${FEATURE_BRANCH#$FEATURE_PREFIX}
-	else
-		warn "The current HEAD is not a feature branch."
-		warn "Please specify a <name> argument."
-		exit 1
 	fi
 }
 
