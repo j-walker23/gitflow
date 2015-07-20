@@ -1,8 +1,8 @@
 Notes
 =======
 This is a fork [DataSift's HubFlow branching model](http://datasift.github.com/gitflow/)
-Install it the same, expect point at `git@github.com:j-walker23/gitflow.git`
-Everything is the same expect i tried to complete the latest release that was in progress 1.6.0, and add any nice features/fixes i wanted.
+Install it the same, except point at `git@github.com:j-walker23/gitflow.git`
+Everything is the same except I tried to complete the latest release that was in progress 1.6.0, and add any nice features/fixes i wanted.
 
 HubFlow
 =======
