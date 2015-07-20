@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.7.1
+HUBFLOW_VERSION=1.7.2
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
