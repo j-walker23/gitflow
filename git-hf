@@ -65,6 +65,7 @@ usage() {
 	echo "   pull      Pull upstream changes down into your master, develop, and current branches."
 	echo "   update    Pull upstream changes down into your master and develop branches."
 	echo "   version   Shows version information."
+	echo "   tag       Show the latest tags on origin. Useful to know what the next hotfix should be"
 	echo
 	echo "Try 'git hf <subcommand> help' for details."
 }

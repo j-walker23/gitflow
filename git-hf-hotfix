@@ -54,6 +54,8 @@ usage() {
 	echo "       git hf hotfix push [<remote> [<version>]]"
 	echo "       git hf hotfix cancel [-f] <version>"
 	echo "       git hf hotfix rename <new-version>"
+	echo "       git hf hotfix checkout <version>"
+	echo "       git hf hotfix co <version> -- alias to checkout"
 }
 
 cmd_default() {
@@ -237,6 +239,50 @@ cmd_start() {
 	echo "     git hf hotfix finish '$VERSION'"
 	echo
 	echo "  and your changes will be merged back into '$BASE' and '$DEVELOP_BRANCH'."
+}
+
+cmd_co() {
+    cmd_checkout "$@"
+}
+
+cmd_checkout() {
+
+	DEFINE_boolean fetch true "fetch from $ORIGIN before creating the new branch" F
+	parse_args "$@"
+	if hubflow_is_support_branch ; then
+		BASE=$CURRENT_BRANCH
+	else
+		BASE=$MASTER_BRANCH
+	fi
+	require_version_arg
+
+	require_clean_working_tree
+	require_remote_available
+	if flag fetch ; then
+		hubflow_fetch_latest_changes_from_origin
+	fi
+
+	local hotfix_origin="$ORIGIN/$HOTFIX_BRANCH"
+	require_remote_branch $hotfix_origin
+	require_tag_absent "$VERSION_PREFIX$VERSION"
+
+    git checkout "$HOTFIX_BRANCH"
+	# remember where to merge it back to
+	git_config_set_branch "$HOTFIX_BRANCH" hubflowBase "$BASE"
+
+	echo
+	echo "Summary of actions:"
+	echo "- You have checked out the hotfix branch $HOTFIX_BRANCH"
+	echo
+	echo "Follow-up actions:"
+	echo "- Add any changes needed to this hotfix"
+	echo "- When done, run:"
+	echo
+	echo "     git hf hotfix finish '$VERSION'"
+	echo
+	echo "  and your changes will be merged back into '$BASE' and '$DEVELOP_BRANCH'."
+
+
 }
 
 cmd_finish() {
