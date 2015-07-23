@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# HubFlow - a fork of the git-flow tools to apply Vincent Driessen's
+# branching model to working with GitHub
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+
+require_git_repo
+require_hubflow_initialized
+hubflow_load_settings
+
+usage() {
+    echo "usage: git hf tag      -- show the latest tagged release on remote origin"
+    echo "       git hf tag list -- show list of all tags"
+}
+
+cmd_default() {
+    cmd_latest
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_latest() {
+    echo "`git ls-remote --tags | grep -v '\^' | tail -n 1 | cut -d / -f 3`"
+}
+
+cmd_list() {
+    echo "`git ls-remote --tags | grep -v '\^' | cut -d / -f 3`"
+}
