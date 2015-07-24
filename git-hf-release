@@ -230,6 +230,11 @@ cmd_finish() {
 	DEFINE_boolean notag false "don't tag this release" n
 
 	parse_args "$@"
+
+    if startswith $(git_current_branch) "$RELEASE_PREFIX"; then
+        VERSION=$(echo $(git_current_branch) | sed "s/$RELEASE_PREFIX/" | cut -c 2-)
+    fi
+
 	require_version_arg
 
 	# make sure that nasty things don't happen if we're not on
