@@ -92,7 +92,7 @@ cmd_update() {
 	use_current_feature_branch_name
 
 	if [[ -n $NAME ]]; then
-	    git merge $ORIGIN/$DEVELOP_BRANCH
+	    git rebase $DEVELOP_BRANCH
     fi
 
 	# drop any branches that have disappeared from origin
