@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.8.0
+HUBFLOW_VERSION=1.9.0
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
@@ -667,7 +667,7 @@ require_github_auth_token() {
 github_origin_repo() {
   # get the URL for the $ORIGIN repo
   GITHUB_ORIGIN=$(git remote show -n "$ORIGIN" | grep 'Fetch URL' | cut -c 14-)
-  echo "$GITHUB_ORIGIN" 1>&2
+#  echo "$GITHUB_ORIGIN" 1>&2
 #  GIT_HOST=${GITHUB_ENTERPRISE_HOST:-GITHUB_HOST}
   GIT_HOST=$GITHUB_HOST
   if [ -n $GITHUB_ENTERPRISE_HOST ]; then
@@ -681,7 +681,7 @@ github_origin_repo() {
   else
     GITHUB_ORIGIN=
   fi
-  echo "$GITHUB_ORIGIN" 1>&2
+#  echo "$GITHUB_ORIGIN" 1>&2
 }
 
 require_github_origin_repo() {
