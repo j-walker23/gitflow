@@ -263,6 +263,11 @@ cmd_submit() {
     BASE=${2:-$DEVELOP_BRANCH}
 	name_or_current
 
+    # the base is where the feature was created
+    # most of the time it will be develop branch
+    # but it could be support branches
+    BASE=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
+
 	# sanity checks
 	require_branch "$FEATURE_BRANCH"
 	require_clean_working_tree
