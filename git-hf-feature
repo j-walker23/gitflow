@@ -219,6 +219,8 @@ cmd_start() {
 	NEW_BRANCH="$FEATURE_PREFIX$1"
 	require_name_arg
 
+    echo "Base Branch == $BASE"
+
 	# sanity checks
 	require_clean_working_tree
 	require_remote_available
@@ -267,6 +269,7 @@ cmd_submit() {
     # most of the time it will be develop branch
     # but it could be support branches
     BASE=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
+    echo "Base Branch == $BASE"
 
 	# sanity checks
 	require_branch "$FEATURE_BRANCH"
@@ -371,6 +374,7 @@ cmd_finish() {
 
 	# where are we merging into?
 	BASE_BRANCH=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
+    echo "Base Branch == $BASE_BRANCH"
 
 	# sanity checks
 	require_branch "$FEATURE_BRANCH"
@@ -415,7 +419,7 @@ cmd_finish() {
 	# merge into the base branch
 	# the merge_helper will not return if there is a merge conflict
 	# we want to remain on the BASE_BRANCH after the merge is complete
-	hubflow_local_merge_helper "$FEATURE_BRANCH" "$BASE_BRANCH" no_checkout_afterwards
+	hubflow_local_merge_helper "$FEATURE_BRANCH" "$BASE_BRANCH" no_ff no_checkout_afterwards
 
 	# make sure the merge worked
 	if [[ $(git rev-list -n2 "$BASE_BRANCH..$FEATURE_BRANCH") ]] ; then
