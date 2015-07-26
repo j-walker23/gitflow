@@ -93,8 +93,10 @@ cmd_update() {
 
 	if [[ -n $NAME ]]; then
 		BASE_BRANCH=$(git_config_get_branch $NAME hubflowBase)
-    	echo "Base Branch == $BASE_BRANCH"
-	    git rebase $BASE_BRANCH
+		if [[ -n $BASE_BRANCH ]]; then
+            echo "Base Branch == $BASE_BRANCH"
+            git rebase $BASE_BRANCH
+		fi
     fi
 
 	# drop any branches that have disappeared from origin
@@ -111,8 +113,8 @@ cmd_update() {
 	fi
 	echo "- Any changes from $ORIGIN/$MASTER_BRANCH have been merged into branch '$MASTER_BRANCH'"
 	echo "- Any changes from $ORIGIN/$DEVELOP_BRANCH have been merged into branch '$DEVELOP_BRANCH'"
-	if [[ -n $NAME ]]; then
-	    echo "- Any changes from $ORIGIN/$DEVELOP_BRANCH have been merged into $CURRENT_BRANCH"
+	if [[ -n $BASE_BRANCH ]]; then
+	    echo "- Any changes from $ORIGIN/$BASE_BRANCH have been merged into $CURRENT_BRANCH"
 	fi
 	echo "- Any changes in support branches at $ORIGIN have been merged into your local support branches"
 	echo "- Any resolved merge conflicts have been pushed back to $ORIGIN"
