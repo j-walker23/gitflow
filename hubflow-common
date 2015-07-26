@@ -459,7 +459,7 @@ hubflow_merge_latest_changes_from_origin() {
     fi
 
 	# merge any support branches that exist
-	local support_branches=$(git_list_branches_of_type support)
+	local support_branches=$(git_list_branches_of_type $SUPPORT_PREFIX)
 	for support_branch in $support_branches ; do
 		support_branch=$SUPPORT_PREFIX$support_branch
 		# skip support branches we don't use locally
