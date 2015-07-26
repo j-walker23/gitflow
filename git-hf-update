@@ -93,7 +93,7 @@ cmd_update() {
 
 	if [[ -n $NAME ]]; then
 		BASE_BRANCH=$(git_config_get_branch $NAME hubflowBase)
-    	echo "Base Branch == $BASE"
+    	echo "Base Branch == $BASE_BRANCH"
 	    git rebase $BASE_BRANCH
     fi
 
