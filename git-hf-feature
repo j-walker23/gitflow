@@ -530,12 +530,12 @@ cmd_checkout() {
     # branches that are checked out do not get hubflowbase set correctly
     # if checking out a branch from a support branch
     # one would need to add the hubflow base that is used everywhere
-    BASE=git_config_get_branch $FEATURE_BRANCH hubflowBase
+    BASE=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
     if [[ -n $2 ]]; then
         BASE=$2
         git_config_set_branch "$FEATURE_BRANCH" hubflowBase "$BASE"
     fi
-    echo 'Base Branch == $BASE'
+    echo "Base Branch == $BASE"
 
 }
 
