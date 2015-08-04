@@ -91,10 +91,11 @@ cmd_update() {
 
 	use_current_feature_branch_name
 
-	if [[ -n $NAME ]]; then
-		BASE_BRANCH=$(git_config_get_branch $NAME hubflowBase)
+	if [[ -n $FEATURE_BRANCH ]]; then
+		BASE_BRANCH=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
 		if [[ -n $BASE_BRANCH ]]; then
-            echo "Base Branch == $BASE_BRANCH"
+		    echo "Feature is $NAME"
+            echo "Base is    $BASE_BRANCH"
             git rebase $BASE_BRANCH
 		fi
     fi
