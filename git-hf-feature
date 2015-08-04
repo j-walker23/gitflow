@@ -262,13 +262,18 @@ cmd_start() {
 
 cmd_submit() {
 	parse_args "$@"
-    BASE=${2:-$DEVELOP_BRANCH}
+    BASE=$2
 	name_or_current
 
     # the base is where the feature was created
     # most of the time it will be develop branch
     # but it could be support branches
-    BASE=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
+    if [[ -z $BASE ]]; then
+    	BASE=$(git_config_get_branch $FEATURE_BRANCH hubflowBase)
+    	if [[ -z $BASE ]]; then
+    		BASE="$DEVELOP_BRANCH"
+		fi
+	fi
     echo "Base Branch == $BASE"
 
 	# sanity checks
@@ -535,6 +540,10 @@ cmd_checkout() {
         BASE=$2
         git_config_set_branch "$FEATURE_BRANCH" hubflowBase "$BASE"
     fi
+    if [[ -z $BASE ]]; then
+    	BASE=$DEVELOP_BRANCH
+        git_config_set_branch "$FEATURE_BRANCH" hubflowBase "$BASE"
+	fi
     echo "Base Branch == $BASE"
 
 }
