@@ -76,6 +76,8 @@ cmd_help() {
 cmd_update() {
 	# flags
 	DEFINE_boolean prune true "delete local copies of branches that have been deleted from $ORIGIN" p
+	DEFINE_boolean rebase false "merge instead of rebase" r
+
 	parse_args "$@"
 
 	# make sure we're okay to start
@@ -96,7 +98,11 @@ cmd_update() {
 		if [[ -n $BASE_BRANCH ]]; then
 		    echo "Feature is $NAME"
             echo "Base is    $BASE_BRANCH"
-            git rebase $BASE_BRANCH
+            if flag rebase; then
+            	git rebase $BASE_BRANCH
+			else
+            	git merge $BASE_BRANCH
+			fi
 		fi
     fi
 
