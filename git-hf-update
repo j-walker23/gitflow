@@ -84,7 +84,7 @@ cmd_update() {
 	require_clean_working_tree
 
 	# fetch and merge the latest changes from origin
-	hubflow_merge_latest_changes_from_origin
+	hubflow_merge_latest_changes_from_origin "rebase"
 
 	# make sure we end up where we should be
 	if [[ $(git_current_branch) != $CURRENT_BRANCH ]] ; then

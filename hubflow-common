@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.9.8
+HUBFLOW_VERSION=1.9.10
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
@@ -337,11 +337,13 @@ hubflow_remote_merge_helper() {
     hubflow_branch_push "$merge_to"
 
     # merge from origin
-    # do not pull, as we will already have a local copy of the branch
-    # git merge "$origin/$merge_to"
 
     # changing to rebase to try and remove some what seem to be not needed merge commits
-    git pull --rebase
+    if [[ $flag_do_rebase == "yes" ]] ; then
+        git pull --rebase
+    else
+        git merge "$origin/$merge_to"
+    fi
 
     # did the merge work?
     if [[ $? -ne 0 ]] ; then
@@ -438,10 +440,15 @@ hubflow_merge_latest_changes_from_origin() {
     # remember which branch is currently checked out
     hubflow_branch_push_current_branch
 
+    do_rebase="no"
+    if [ -n "$1" ] ; then
+        do_rebase="yes"
+    fi
+
     # merge the master branch first
     # merge conflicts on master will be rare
     if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
-        hubflow_remote_merge_helper "$ORIGIN" "$MASTER_BRANCH" no_checkout_afterwards
+        hubflow_remote_merge_helper "$ORIGIN" "$MASTER_BRANCH" no_checkout_afterwards do_rebase
         git_compare_branches "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
         if [[ $? -ne 0 ]] ; then
             git push "$ORIGIN" "$MASTER_BRANCH" || die "Push to '$ORIGIN' failed"
@@ -451,7 +458,7 @@ hubflow_merge_latest_changes_from_origin() {
     # merge the develop branch next
     # merge conflicts on develop are sadly more common
     if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
-        hubflow_remote_merge_helper "$ORIGIN" "$DEVELOP_BRANCH" no_checkout_afterwards
+        hubflow_remote_merge_helper "$ORIGIN" "$DEVELOP_BRANCH" no_checkout_afterwards do_rebase
         git_compare_branches "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
         if [[ $? -ne 0 ]] ; then
             git push "$ORIGIN" "$DEVELOP_BRANCH" || die "Push to '$ORIGIN' failed"
@@ -464,7 +471,7 @@ hubflow_merge_latest_changes_from_origin() {
 		support_branch=$SUPPORT_PREFIX$support_branch
 		# skip support branches we don't use locally
 		if git_local_branch_exists $support_branch ; then
-			hubflow_remote_merge_helper "$ORIGIN" "$support_branch" no_checkout_afterwards
+			hubflow_remote_merge_helper "$ORIGIN" "$support_branch" no_checkout_afterwards do_rebase
 			git_compare_branches "$support_branch" "$ORIGIN/$support_branch"
 			if [[ $? -ne 0 ]] ; then
 				git push "$ORIGIN" "$support_branch" || die "Push to '$ORIGIN' failed"
