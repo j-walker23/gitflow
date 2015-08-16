@@ -25,7 +25,7 @@ cmd_help() {
 }
 
 cmd_latest() {
-    echo "`git ls-remote --tags | grep -v '\^' | tail -n 1 | cut -d / -f 3`"
+    hubflow_get_latest_version_number
 }
 
 cmd_list() {
