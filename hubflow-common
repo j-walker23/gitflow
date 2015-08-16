@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.10.0
+HUBFLOW_VERSION=1.9.11
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
@@ -518,8 +518,8 @@ hubflow_push_latest_changes_to_origin() {
 }
 
 hubflow_get_latest_version_number() {
-	LATEST="`git ls-remote --tags $HUBFLOW_REPO | grep -v '\^' | tail -n 1 | cut -d / -f 3`"
-
+#	LATEST="`git ls-remote --tags $HUBFLOW_REPO | grep -v '\^' | tail -n 1 | cut -d / -f 3`"
+    LATEST="`git ls-remote --tags $HUBFLOW_REPO | grep -v -|grep -v {| sort -n -t. -k3 -k4 | tail -n 1 | cut -d / -f 3`"
 	echo $LATEST
 }
 
