@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.9.13
+HUBFLOW_VERSION=1.9.14
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
@@ -401,7 +401,7 @@ hubflow_local_merge_helper() {
     if [[ "$(git rev-list -n2 "$merge_to..$merge_from" | wc -l)" -eq 1 && -z $flag_no_ff ]]; then
         git merge --ff "$merge_from"
     else
-        git merge --no-ff "$merge_from"
+        git merge --no-ff "$merge_from" --no-edit
     fi
 
     # did the merge work?
