@@ -45,7 +45,7 @@
 # Common variables
 #
 
-HUBFLOW_VERSION=1.9.12
+HUBFLOW_VERSION=1.9.13
 HUBFLOW_REPO=https://github.com/j-walker23/gitflow.git
 GITHUB_HOST="github.com"
 
@@ -342,7 +342,7 @@ hubflow_remote_merge_helper() {
     if [[ $flag_do_rebase == "yes" ]] ; then
         git pull --rebase
     else
-        git merge "$origin/$merge_to"
+        git merge "$origin/$merge_to" --no-edit
     fi
 
     # did the merge work?
