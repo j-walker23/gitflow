@@ -342,7 +342,7 @@ hubflow_remote_merge_helper() {
     if [[ $flag_do_rebase == "yes" ]] ; then
         git pull --rebase
     else
-        git merge "$origin/$merge_to"
+        git merge "$origin/$merge_to" --no-edit
     fi
 
     # did the merge work?
