@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # HubFlow - a fork of the git-flow tools to apply Vincent Driessen's
 # branching model to working with GitHub
@@ -59,8 +58,8 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	VERSION=$(get_next_version ${FLAGS_type})
-	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
+#	VERSION=$(get_next_version ${FLAGS_type})
+#	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
 }
 
 
@@ -71,10 +70,13 @@ cmd_npm() {
 	DEFINE_string script "" "script to source before tag and merge" s
 	DEFINE_boolean nopush false "push to $ORIGIN after performing finish" p
 
-    echo "one $1"
+#	echo $0
+	echo $(ps -p $$)
 	parse_args "$@"
+	echo "msg $FLAGS_msg"
     echo "one $1"
 
+	die
 	echo "Publishing version $VERSION"
 
     tag_branch="$MASTER_BRANCH"
