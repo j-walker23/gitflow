@@ -66,6 +66,7 @@ usage() {
 	echo "   update    Pull upstream changes down into your master and develop branches."
 	echo "   version   Shows version information."
 	echo "   tag       Show the latest tags on origin. Useful to know what the next hotfix should be"
+	echo "   build     Quick develop to master release for quick building small packages"
 	echo
 	echo "Try 'git hf <subcommand> help' for details."
 }
