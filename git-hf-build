@@ -59,8 +59,8 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-#	VERSION=$(get_next_version ${FLAGS_type})
-#	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
+	VERSION=$(get_next_version ${FLAGS_type})
+	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
 }
 
 
@@ -69,38 +69,15 @@ cmd_npm() {
     DEFINE_string msg "release" "release commit message" m
 	DEFINE_string type "patch" "semver type for bump" t
 	DEFINE_string script "" "script to source before tag and merge" s
-	DEFINE_boolean nopush false "push to $ORIGIN after performing finish" p
+	DEFINE_boolean push true "push to $ORIGIN after performing finish" p
+	DEFINE_boolean notag false "don't tag this release" n
 
 	parse_args "$@"
-	echo "msg $FLAGS_msg"
-    echo "one $1"
-
-	die
 	echo "Publishing version $VERSION"
-}
-
-cmd_npm_old() {
-
-    DEFINE_string msg "release" "release commit message" m
-	DEFINE_string type "patch" "semver type for bump" t
-	DEFINE_string script "" "script to source before tag and merge" s
-	DEFINE_boolean nopush false "push to $ORIGIN after performing finish" p
-
-#	echo $0
-	echo $(ps -p $$)
-	parse_args "$@"
-	echo "msg $FLAGS_msg"
-    echo "one $1"
-
-	die
-	echo "Publishing version $VERSION"
-
-    tag_branch="$MASTER_BRANCH"
-    additional_branch="$DEVELOP_BRANCH"
-    final_branch="$DEVELOP_BRANCH"
 
     # try to tag the release
     local tagname="$VERSION"
+    local $tag_branch="master"
 
     git commit --all -m "feat($tagname): $FLAGS_msg"
 
@@ -112,59 +89,58 @@ cmd_npm_old() {
     hubflow_merge_latest_changes_from_origin
 	hubflow_push_latest_changes_to_origin
 
-	# we need to be up to date before we go any further
-	for merge_branch in $tag_branch $additional_branch ; do
-		if has "$ORIGIN/$merge_branch" $(git_remote_branches); then
-			require_branches_equal "$merge_branch" "$ORIGIN/$merge_branch"
-		fi
-	done
+    git rebase master
 
-	# try to merge into the branch we want to tag, first
-	# in case a previous attempt to finish this release branch has failed,
-	# but the merge into master was successful, we skip it now
-	hubflow_local_merge_helper "$DEVELOP_BRANCH" "$tag_branch" no_checkout_afterwards no_ff
+    if  ! git_is_branch_merged_into "master" "develop"; then
+        die "Error: Rebase master on dev failed"
+    fi
+
+	hubflow_local_merge_helper "develop" "master" no_ff no_checkout_afterwards
+
+	# make sure the merge worked
+	if [[ $(git rev-list -n2 "master..develop") ]] ; then
+		die "Error: Merge develop into master failed"
+	fi
 
 
+
+    tag_msg="Released $tagname"
     # add the tag message if there is one
-    opts="$opts -m Released $tagname"
+    opts='-m "$tag_msg"'
 
-    git checkout "$tag_branch" || die "Could not checkout $tag_branch."
+    git checkout "master" || die "Could not checkout $tag_branch."
     eval git tag $opts "$tagname" || die "Tagging failed. Please run finish again to retry."
 
-    hubflow_local_merge_helper "$tagname" "$additional_branch" no_ff no_checkout_afterwards
+    hubflow_local_merge_helper "$tagname" "develop" no_ff no_checkout_afterwards
 
 	# switch to our final branch
-	hubflow_change_branch "$final_branch"
+	hubflow_change_branch "develop"
 
-	if noflag nopush; then
+	if flag push; then
 		# push the changed branches
-		for merge_branch in $tag_branch $additional_branch ; do
-			git push "$ORIGIN" "$merge_branch" || \
-			die "Could not push $merge_branch to $ORIGIN."
+		for merge_branch in master develop ; do
+			git push "$ORIGIN" "$merge_branch" || die "Could not push $merge_branch to $ORIGIN."
 		done
 
 		# push any new tags
 		if noflag notag; then
-			git push --tags "$ORIGIN" || \
-			  die "Could not push tags to $ORIGIN."
+			git push --tags "$ORIGIN" || die "Could not push tags to $ORIGIN."
 		fi
-
 	fi
 
 	echo
 	echo "Summary of actions:"
-	if noflag nopush ; then
+	if flag push ; then
 		echo "- Latest objects have been fetched from '$ORIGIN'"
 	fi
-	echo "- Branch '$DEVELOP_BRANCH' has been merged into $tag_branch"
+	echo "- Branch '$DEVELOP_BRANCH' has been merged into master"
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
-		if [[ -n $additional_branch ]] ; then
-			echo "- The tag '$tagname' was merged into $additional_branch"
-		fi
+        echo "- The tag '$tagname' was merged into develop"
 	fi
-	if noflag nopush; then
+	if flag push; then
 		echo "- Changed branches and tags have been pushed to '$ORIGIN'"
 	fi
 	echo
 }
+
