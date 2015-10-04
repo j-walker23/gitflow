@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # HubFlow - a fork of the git-flow tools to apply Vincent Driessen's
 # branching model to working with GitHub
@@ -64,6 +65,21 @@ parse_args() {
 
 
 cmd_npm() {
+
+    DEFINE_string msg "release" "release commit message" m
+	DEFINE_string type "patch" "semver type for bump" t
+	DEFINE_string script "" "script to source before tag and merge" s
+	DEFINE_boolean nopush false "push to $ORIGIN after performing finish" p
+
+	parse_args "$@"
+	echo "msg $FLAGS_msg"
+    echo "one $1"
+
+	die
+	echo "Publishing version $VERSION"
+}
+
+cmd_npm_old() {
 
     DEFINE_string msg "release" "release commit message" m
 	DEFINE_string type "patch" "semver type for bump" t
