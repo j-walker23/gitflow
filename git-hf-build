@@ -58,11 +58,11 @@ parse_args() {
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
+    if [[ ! ${FLAGS_type} ]]; then
+        FLAGS_type=patch
+    fi
 	# read arguments into global variables
-	VERSION=$(get_next_version ${FLAGS_type})
-	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
 }
-
 
 cmd_npm() {
 
@@ -73,60 +73,75 @@ cmd_npm() {
 	DEFINE_boolean notag false "don't tag this release" n
 
 	parse_args "$@"
+	VERSION=$(get_next_version ${FLAGS_type})
+	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
 	echo "Publishing version $VERSION"
 
     # try to tag the release
     local tagname="$VERSION"
-    local $tag_branch="master"
+    local tag_branch="master"
 
+    echo && echo "Committing any inital changes"
     git commit --all -m "feat($tagname): $FLAGS_msg"
 
 	if [[ ${FLAGS_script} ]] ; then
-		source ${FLAGS_script}
+	    echo && echo "Running script ${flags_script}"
+		eval $FLAGS_script
+		echo && echo "Commit any script changes"
 		git commit --all -m "chore($tagname): bump and changelog"
 	fi
 
+    echo && echo "Merge from origin"
     hubflow_merge_latest_changes_from_origin
+    echo && echo "Pushing to origin"
 	hubflow_push_latest_changes_to_origin
 
+    echo && echo "Merge master onto develop"
     git rebase master
 
+    echo && echo "Checking if rebase was a success"
     if  ! git_is_branch_merged_into "master" "develop"; then
         die "Error: Rebase master on dev failed"
     fi
 
+    echo && echo "Force pushing develop due to rebase"
+    git push -f
+
+    echo && echo "Merging develop into master"
 	hubflow_local_merge_helper "develop" "master" no_ff no_checkout_afterwards
 
 	# make sure the merge worked
+    echo && echo "Verifying merge"
 	if [[ $(git rev-list -n2 "master..develop") ]] ; then
 		die "Error: Merge develop into master failed"
 	fi
 
-
-
     tag_msg="Released $tagname"
     # add the tag message if there is one
-    opts='-m "$tag_msg"'
+    opts='-a -m "$tag_msg"'
 
-    git checkout "master" || die "Could not checkout $tag_branch."
+    echo && echo "Tagging $tagname"
     eval git tag $opts "$tagname" || die "Tagging failed. Please run finish again to retry."
 
-    hubflow_local_merge_helper "$tagname" "develop" no_ff no_checkout_afterwards
-
-	# switch to our final branch
-	hubflow_change_branch "develop"
 
 	if flag push; then
 		# push the changed branches
-		for merge_branch in master develop ; do
-			git push "$ORIGIN" "$merge_branch" || die "Could not push $merge_branch to $ORIGIN."
-		done
+        echo && echo "Pushing master"
+		git push "$ORIGIN" "master" || die "Could not push $merge_branch to $ORIGIN."
 
 		# push any new tags
 		if noflag notag; then
+            echo && echo "Pushing all tags to origin"
 			git push --tags "$ORIGIN" || die "Could not push tags to $ORIGIN."
 		fi
 	fi
+
+    echo && echo "Checking out develop"
+	hubflow_change_branch "develop"
+
+#    echo && echo "Merge master back into develop and push"
+#	git merge master
+#	git push
 
 	echo
 	echo "Summary of actions:"
