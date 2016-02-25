@@ -290,13 +290,18 @@ cmd_finish() {
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
-	DEFINE_boolean automessage false "use the tag name as the message" M
+	DEFINE_boolean automessage true "use the tag name as the message" M
 	DEFINE_boolean push true "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
 	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)" b	parse_args "$@"
 
 	parse_args "$@"
+
+    if startswith $(git_current_branch) "$HOTFIX_PREFIX"; then
+        VERSION=$(echo $(git_current_branch) | sed "s/$HOTFIX_PREFIX/" | cut -c 2-)
+    fi
+
 	require_version_arg
 
 	# handle flags that imply other flags
@@ -321,8 +326,8 @@ cmd_finish() {
 	fi
 
 	# where are we merging into?
-	BASE=$(git_config_get_branch $HOTFIX_BRANCH hubflowBase)
-	if [[ $BASE == $MASTER_BRANCH ]] ; then
+	BASE=$(git_config_get_branch ${HOTFIX_BRANCH} hubflowBase)
+	if [[ ${BASE} == ${MASTER_BRANCH} ]] ; then
 		# this is a release made from develop
 		#
 		# we must merge it into MASTER and DEVELOP

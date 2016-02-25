@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+#
+# HubFlow - a fork of the git-flow tools to apply Vincent Driessen's
+# branching model to working with GitHub
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+# The HubFlow documentation is found at:
+#    http://datasift.github.com/gitflow/
+#
+# Feel free to contribute to this project at:
+#    http://github.com/datasift/gitflow
+#
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# Copyright 2012 MediaSift Ltd. All rights reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+# THIS IS A CUSTOM FORK OF THE AWESOME HUBLFOW. MOSTLY FOR MY PERSONAL USE.
+# USE WITH CAUTION.
+
+require_git_repo
+require_hubflow_initialized
+hubflow_load_settings
+
+warn() { echo "$@" >&2; }
+die() { warn "$@"; exit 1; }
+
+usage() {
+    echo "usage: git hf build    -- quick merge and release for npm publishing"
+}
+
+cmd_default() {
+    cmd_npm "$@"
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+get_next_version () {
+    echo $(npm version --no-git-tag-version ${1} | cut -d "v" -f 2)
+}
+
+parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+    if [[ ! ${FLAGS_type} ]]; then
+        FLAGS_type=patch
+    fi
+	# read arguments into global variables
+}
+
+cmd_npm() {
+
+    DEFINE_string msg "release" "release commit message" m
+	DEFINE_string type "patch" "semver type for bump" t
+	DEFINE_string script "" "script to source before tag and merge" s
+	DEFINE_boolean push true "push to $ORIGIN after performing finish" p
+	DEFINE_boolean notag false "don't tag this release" n
+
+	parse_args "$@"
+	VERSION=$(get_next_version ${FLAGS_type})
+	[[ -n ${VERSION} ]] || die "Version not calculated correctly"
+	echo "Publishing version $VERSION"
+
+    # try to tag the release
+    local tagname="$VERSION"
+    local tag_branch="master"
+
+    echo && echo "Committing any inital changes"
+    git commit --all -m "feat($tagname): $FLAGS_msg"
+
+	if [[ ${FLAGS_script} ]] ; then
+	    echo && echo "Running script ${flags_script}"
+		eval $FLAGS_script
+		echo && echo "Commit any script changes"
+		git commit --all -m "chore($tagname): bump and changelog"
+	fi
+
+    echo && echo "Merge from origin"
+    hubflow_merge_latest_changes_from_origin
+    echo && echo "Pushing to origin"
+	hubflow_push_latest_changes_to_origin
+
+    echo && echo "Merge master onto develop"
+    git rebase master
+
+    echo && echo "Checking if rebase was a success"
+    if  ! git_is_branch_merged_into "master" "develop"; then
+        die "Error: Rebase master on dev failed"
+    fi
+
+    echo && echo "Force pushing develop due to rebase"
+    git push -f
+
+    echo && echo "Merging develop into master"
+	hubflow_local_merge_helper "develop" "master" no_ff no_checkout_afterwards
+
+	# make sure the merge worked
+    echo && echo "Verifying merge"
+	if [[ $(git rev-list -n2 "master..develop") ]] ; then
+		die "Error: Merge develop into master failed"
+	fi
+
+    tag_msg="Released $tagname"
+    # add the tag message if there is one
+    opts='-a -m "$tag_msg"'
+
+    echo && echo "Tagging $tagname"
+    eval git tag $opts "$tagname" || die "Tagging failed. Please run finish again to retry."
+
+
+	if flag push; then
+		# push the changed branches
+        echo && echo "Pushing master"
+		git push "$ORIGIN" "master" || die "Could not push $merge_branch to $ORIGIN."
+
+		# push any new tags
+		if noflag notag; then
+            echo && echo "Pushing all tags to origin"
+			git push --tags "$ORIGIN" || die "Could not push tags to $ORIGIN."
+		fi
+	fi
+
+    echo && echo "Checking out develop"
+	hubflow_change_branch "develop"
+
+#    echo && echo "Merge master back into develop and push"
+#	git merge master
+#	git push
+
+	echo
+	echo "Summary of actions:"
+	if flag push ; then
+		echo "- Latest objects have been fetched from '$ORIGIN'"
+	fi
+	echo "- Branch '$DEVELOP_BRANCH' has been merged into master"
+	if noflag notag; then
+		echo "- The release was tagged '$tagname'"
+        echo "- The tag '$tagname' was merged into develop"
+	fi
+	if flag push; then
+		echo "- Changed branches and tags have been pushed to '$ORIGIN'"
+	fi
+	echo
+}
+

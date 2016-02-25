@@ -1,5 +1,8 @@
+.DS_STORE
 debian/files
 debian/*.substvars
 debian/*.debhelper.log
 debian/*/*
 .tags*
+
+.idea/
