@@ -67,7 +67,7 @@ cmd_help() {
 
 cmd_pull() {
     # we support rebasing
-    DEFINE_boolean rebase true "pull with rebase" r
+    DEFINE_boolean rebase false "pull with rebase" r
     parse_args "$@"
 
     # make sure we're okay to start
