@@ -266,7 +266,7 @@ hubflow_change_branch() {
 
 hubflow_branch_push() {
     # make sure we have a stack to push onto
-    if [[ -z BRANCH_STACK ]] ; then
+    if [[ -z ${BRANCH_STACK+x} ]] ; then
         BRANCH_STACK=()
         BRANCH_STACK_SP=0
     fi
@@ -274,7 +274,6 @@ hubflow_branch_push() {
     # push the requested branch onto the stack
     BRANCH_STACK[$BRANCH_STACK_SP]="$1"
     let "BRANCH_STACK_SP += 1"
-
     # do we need to switch branch too?
     hubflow_change_branch "$1"
 }
@@ -290,10 +289,12 @@ hubflow_branch_pop() {
     # make sure the stack is not empty
     [[ $BRANCH_STACK_SP != 0 ]] || die "Internal error: attempt to pop from empty BRANCH_STACK"
 
-    # pop the branch from the stack
-    local popped_branch=${BRANCH_STACK[$BRANCH_STACK_SP]}
-    BRANCH_STACK[$BRANCH_STACK_SP]=
     let "BRANCH_STACK_SP -= 1"
+
+    # pop the branch from the stack
+    popped_branch=${BRANCH_STACK[$BRANCH_STACK_SP]}
+    [[ ! -z $popped_branch ]] || die "Internal error: branch not popped"
+    BRANCH_STACK[$BRANCH_STACK_SP]=
 
     # do we need to switch branch too?
     hubflow_change_branch "$popped_branch"
