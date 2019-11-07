@@ -245,13 +245,13 @@ hubflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get hubflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get hubflow.branch.develop)
 	export ORIGIN=$(git config --get hubflow.origin || echo origin)
-    export CURRENT_BRANCH=$(git_current_branch)
+  export CURRENT_BRANCH=$(git_current_branch)
 
-    export FEATURE_PREFIX=$(git config --get hubflow.prefix.feature)
-    export RELEASE_PREFIX=$(git config --get hubflow.prefix.release)
-    export HOTFIX_PREFIX=$(git config --get hubflow.prefix.hotfix)
-    export SUPPORT_PREFIX=$(git config --get hubflow.prefix.support)
-    export VERSION_PREFIX=$(git config --get hubflow.prefix.versiontag)
+  export FEATURE_PREFIX=$(git config --get hubflow.prefix.feature)
+  export RELEASE_PREFIX=$(git config --get hubflow.prefix.release)
+  export HOTFIX_PREFIX=$(git config --get hubflow.prefix.hotfix)
+  export SUPPORT_PREFIX=$(git config --get hubflow.prefix.support)
+  export VERSION_PREFIX=$(git config --get hubflow.prefix.versiontag)
 }
 
 hubflow_change_branch() {

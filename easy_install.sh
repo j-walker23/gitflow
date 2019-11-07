@@ -1,6 +1,6 @@
 
 EXEC_FILES="git-hf"
-SCRIPT_FILES="git-hf-init git-hf-feature git-hf-hotfix git-hf-push git-hf-pull git-hf-release git-hf-support git-hf-update git-hf-upgrade git-hf-version git-hf-tag hubflow-common hubflow-shFlags"
+SCRIPT_FILES="git-hf-init git-hf-feature git-hf-bug git-hf-chore git-hf-refactor git-hf-hotfix git-hf-push git-hf-pull git-hf-release git-hf-support git-hf-update git-hf-upgrade git-hf-version git-hf-tag hubflow-common hubflow-shFlags"
 
 REPO_DIR="$(dirname $0)"
 
