@@ -44,7 +44,7 @@
 require_git_repo
 require_hubflow_initialized
 hubflow_load_settings
-PREFIX='bug'
+PREFIX='bug/'
 
 usage() {
 	echo "usage: git hf bug [list] [-v]"

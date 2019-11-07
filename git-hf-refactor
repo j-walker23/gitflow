@@ -44,7 +44,7 @@
 require_git_repo
 require_hubflow_initialized
 hubflow_load_settings
-PREFIX='refactor'
+PREFIX='refactor/'
 
 usage() {
 	echo "usage: git hf refactor [list] [-v]"

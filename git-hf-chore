@@ -44,7 +44,7 @@
 require_git_repo
 require_hubflow_initialized
 hubflow_load_settings
-PREFIX='chore'
+PREFIX='chore/'
 
 usage() {
 	echo "usage: git hf chore [list] [-v]"
