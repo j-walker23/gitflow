@@ -58,7 +58,8 @@ parse_args() {
 
 use_current_feature_branch_name() {
 	local current_branch=$(git_current_branch)
-	if startswith "$current_branch" "$FEATURE_PREFIX"; then
+
+	if [[ $current_branch == *"/"* ]]; then
 		FEATURE_BRANCH=$current_branch
 		NAME=${FEATURE_BRANCH#$FEATURE_PREFIX}
 	fi

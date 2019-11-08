@@ -4,5 +4,5 @@ debian/*.substvars
 debian/*.debhelper.log
 debian/*/*
 .tags*
-
+test.sh
 .idea/
